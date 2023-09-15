@@ -15,9 +15,13 @@ public abstract class AbilityBase : MonoBehaviour
 
     public void TriggerAbility()
     {    
-          OnAbilityUse.Invoke(cooldownTime);
-          Ability();
-          StartCooldown(); 
+        if(canUse)
+        {
+            OnAbilityUse.Invoke(cooldownTime);
+            Ability();
+            StartCooldown();
+        }
+         
     }
     public abstract void Ability();
     void StartCooldown()

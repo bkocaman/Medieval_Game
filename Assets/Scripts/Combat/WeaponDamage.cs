@@ -38,6 +38,8 @@ public class WeaponDamage : MonoBehaviour
         {
             Vector3 direction = (other.transform.position - myCollider.transform.position).normalized;
             forceReceiver.AddForce(direction * knockback);
-        }  
+        }
+
+       
     }
 }
