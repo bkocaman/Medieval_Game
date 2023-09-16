@@ -6,34 +6,60 @@ using UnityEngine.SceneManagement;
 public class GateController : MonoBehaviour
 {
     [SerializeField] private GameObject _startingSceneTransition;
+    [SerializeField] private GameObject _startingSceneTransition1;
     [SerializeField] private GameObject _endingSceneTransition;
     public string Gameplay;
+
+    private bool isTransitioning = false;
 
     private void Start()
     {
         Collider collider = gameObject.AddComponent<BoxCollider>();
 
-        _startingSceneTransition.SetActive(true);
-        Invoke("DisableStartingSceneTransition", 5f);
+        ((BoxCollider)collider).size = new Vector3(1f, 1f, 1f);
+        ((BoxCollider)collider).center = new Vector3(0f, 1f, 0f);
+
+        _startingSceneTransition1.SetActive(true);
+        StartCoroutine(DisableStartingSceneTransition(2f));
     }
 
-    private void DisableStartingSceneTransition()
+    private IEnumerator DisableStartingSceneTransition(float delay)
     {
-        _startingSceneTransition.SetActive(false);
+        yield return new WaitForSeconds(delay);
+        _startingSceneTransition1.SetActive(false);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Cube"))
-        {
-            SceneManager.LoadScene(Gameplay);
-            _startingSceneTransition.SetActive(true);
-            StartCoroutine(FunctionTimer.Start(1.5f, LoadNextLevel));
-        }
+        if (isTransitioning || !collision.gameObject.CompareTag("Cube"))
+            return;
+
+        isTransitioning = true;
+
+        _startingSceneTransition.SetActive(true);
+
+        StartCoroutine(StartSceneTransition());
     }
 
-    private void LoadNextLevel()
+    private IEnumerator StartSceneTransition()
     {
-        SceneManager.LoadScene("Gameplay2");
+        yield return new WaitForSeconds(2f);
+
+     
+        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(Gameplay);
+
+
+        while (!loadOperation.isDone)
+        {
+            yield return null;
+        }
+        
+        _endingSceneTransition.SetActive(true);
+        _startingSceneTransition.SetActive(false);
+
+        yield return new WaitForSeconds(2f);
+        _endingSceneTransition.SetActive(false);
+
+        isTransitioning = false;
     }
 }
